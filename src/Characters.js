@@ -1,9 +1,15 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 
-export const Characters = () => {
+export const Characters = ({ category, filter }) => {
   const getCharacterData = async (pageNumber = 1) => {
-    const urlToFetch = `https://rickandmortyapi.com/api/character?page=${pageNumber}`;
+    const baseUrl = "https://rickandmortyapi.com/api/character";
+    const urlToFetch =
+      !category && !filter
+        ? `${baseUrl}?${pageNumber}`
+        : `${baseUrl}?${category}=${filter}&${pageNumber}`;
+    console.log(urlToFetch);
     try {
       const response = await fetch(urlToFetch);
       if (response.ok) {
@@ -19,7 +25,9 @@ export const Characters = () => {
   };
 
   const [characterData, setCharacterData] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useSearchParams({ page: 1 });
+
+  const pageValue = parseInt(pageNumber.get("page"));
 
   useEffect(() => {
     getCharacterData(pageNumber).then((data) => setCharacterData(data));
@@ -31,8 +39,12 @@ export const Characters = () => {
 
   return (
     <>
-      <button onClick={() => setPageNumber(pageNumber - 1)}>Prev</button>
-      <button onClick={() => setPageNumber(pageNumber + 1)}>Next</button>
+      <button onClick={() => setPageNumber({ page: pageValue - 1 })}>
+        Prev
+      </button>
+      <button onClick={() => setPageNumber({ page: pageValue + 1 })}>
+        Next
+      </button>
       <ul>
         {characterData["results"].map((character) => (
           <>
@@ -43,8 +55,8 @@ export const Characters = () => {
           </>
         ))}
       </ul>
-      <button onClick={() => setPageNumber(pageNumber - 1)}>Prev</button>
-      <button onClick={() => setPageNumber(pageNumber + 1)}>Next</button>
+      <button onClick={() => setPageNumber(pageValue - 1)}>Prev</button>
+      <button onClick={() => setPageNumber(pageValue + 1)}>Next</button>
     </>
   );
 };
